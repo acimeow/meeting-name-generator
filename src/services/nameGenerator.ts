@@ -1,7 +1,17 @@
 import Anthropic from '@anthropic-ai/sdk'
 
 // Trim API key to remove any whitespace or newlines
-const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY?.trim()
+const rawApiKey = import.meta.env.VITE_ANTHROPIC_API_KEY
+const apiKey = rawApiKey?.trim().replace(/[\n\r\t]/g, '')
+
+console.log('API Key Debug:', {
+  exists: !!rawApiKey,
+  length: rawApiKey?.length,
+  trimmedLength: apiKey?.length,
+  startsWidth: apiKey?.substring(0, 10),
+  hasNewlines: rawApiKey?.includes('\n'),
+  hasReturns: rawApiKey?.includes('\r'),
+})
 
 if (!apiKey) {
   throw new Error('Missing VITE_ANTHROPIC_API_KEY environment variable')
