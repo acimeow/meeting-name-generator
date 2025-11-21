@@ -1,26 +1,19 @@
 import Anthropic from '@anthropic-ai/sdk'
 
-// Trim API key to remove any whitespace or newlines
-const rawApiKey = import.meta.env.VITE_ANTHROPIC_API_KEY
-const apiKey = rawApiKey?.trim().replace(/[\n\r\t]/g, '')
+function getAnthropicClient() {
+  const rawApiKey = import.meta.env.VITE_ANTHROPIC_API_KEY
+  const apiKey = rawApiKey?.trim().replace(/[\n\r\t]/g, '')
 
-console.log('API Key Debug:', {
-  exists: !!rawApiKey,
-  length: rawApiKey?.length,
-  trimmedLength: apiKey?.length,
-  startsWidth: apiKey?.substring(0, 10),
-  hasNewlines: rawApiKey?.includes('\n'),
-  hasReturns: rawApiKey?.includes('\r'),
-})
+  if (!apiKey) {
+    throw new Error('Missing VITE_ANTHROPIC_API_KEY environment variable')
+  }
 
-if (!apiKey) {
-  throw new Error('Missing VITE_ANTHROPIC_API_KEY environment variable')
+  // Create a new client instance each time to avoid initialization issues
+  return new Anthropic({
+    apiKey: apiKey,
+    dangerouslyAllowBrowser: true,
+  })
 }
-
-const anthropic = new Anthropic({
-  apiKey: apiKey,
-  dangerouslyAllowBrowser: true, // Note: In production, move this to a backend API
-})
 
 export type MeetingType = 'all' | 'brainstorm' | 'retro' | 'planning' | '1:1'
 
@@ -58,6 +51,7 @@ Examples:
 Now generate ${count} NEW creative meeting names:`
 
   try {
+    const anthropic = getAnthropicClient()
     const message = await anthropic.messages.create({
       model: 'claude-3-opus-20240229',
       max_tokens: 1024,
