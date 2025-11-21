@@ -1,7 +1,14 @@
 import Anthropic from '@anthropic-ai/sdk'
 
+// Trim API key to remove any whitespace or newlines
+const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY?.trim()
+
+if (!apiKey) {
+  throw new Error('Missing VITE_ANTHROPIC_API_KEY environment variable')
+}
+
 const anthropic = new Anthropic({
-  apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
+  apiKey: apiKey,
   dangerouslyAllowBrowser: true, // Note: In production, move this to a backend API
 })
 
@@ -19,10 +26,6 @@ export async function generateMeetingNames(
   category: MeetingType = 'all',
   count: number = 8
 ): Promise<string[]> {
-  // Debug: Check if API key is loaded
-  const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY
-  console.log('API Key exists:', !!apiKey)
-  console.log('API Key prefix:', apiKey?.substring(0, 10))
 
   const prompt = `${categoryPrompts[category]}
 
